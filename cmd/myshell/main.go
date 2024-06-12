@@ -19,6 +19,10 @@ func WriteString(w *bufio.Writer, s string) {
 	}
 }
 
+func WriteStringln(w *bufio.Writer, s string) {
+	WriteString(w, s+"\r\n")
+}
+
 func ReadString(r *bufio.Reader) string {
 	s, err := r.ReadString('\n')
 	if err != nil {
@@ -36,16 +40,16 @@ func main() {
 		command := ReadString(reader)
 		command = strings.TrimSuffix(command, "\n")
 		args := strings.Split(command, " ")
-		switch command {
+		switch args[0] {
 		case "exit":
 			exitCode, err := strconv.Atoi(args[1])
 			if err != nil {
-				WriteString(writer, "error: argument must be an integer")
+				WriteStringln(writer, "error: argument must be an integer")
 				break
 			}
 			os.Exit(exitCode)
 		default:
-			WriteString(writer, fmt.Sprintf("%s: command not found\n", command))
+			WriteStringln(writer, fmt.Sprintf("%s: command not found", args[0]))
 		}
 	}
 }
