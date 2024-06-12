@@ -22,6 +22,7 @@ func NewHandler() *Handler {
 
 	h.Register("exit", h.builtinExit)
 	h.Register("echo", h.builtinEcho)
+	h.Register("type", h.builtinType)
 
 	return h
 }
@@ -67,5 +68,18 @@ func (h *Handler) builtinExit(_ *bufio.Writer, _ *bufio.Reader, args []string) e
 
 func (h *Handler) builtinEcho(writer *bufio.Writer, _ *bufio.Reader, args []string) error {
 	WriteStringln(writer, strings.Join(args[1:], " "))
+	return nil
+}
+
+func (h *Handler) builtinType(writer *bufio.Writer, _ *bufio.Reader, args []string) error {
+	_, ok := h.comMap[args[1]]
+	var msg string
+	if !ok {
+		msg = fmt.Sprintf("%s: not found", args[1])
+	} else {
+		msg = fmt.Sprintf("%s is a shell builtin", args[1])
+	}
+
+	WriteStringln(writer, msg)
 	return nil
 }
