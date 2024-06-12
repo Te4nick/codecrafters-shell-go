@@ -30,10 +30,9 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 	writer := bufio.NewWriter(os.Stdout)
 
-	WriteString(writer, "$ ")
-
 	running := true
 	for running {
+		WriteString(writer, "$ ")
 		command := ReadString(reader)
 		command = strings.TrimSuffix(command, "\n")
 		switch command {
