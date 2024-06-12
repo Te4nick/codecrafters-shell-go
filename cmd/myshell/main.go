@@ -12,5 +12,13 @@ func main() {
 
 	fmt.Fprint(os.Stdout, "$ ")
 
-	bufio.NewReader(os.Stdin).ReadString('\n')
+	command, err := bufio.NewReader(os.Stdin).ReadString('\n')
+	if err != nil {
+		panic(err)
+	}
+
+	switch command {
+	default:
+		fmt.Fprintf(os.Stdout, "%q: command not found\n", command)
+	}
 }
