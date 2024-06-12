@@ -31,18 +31,17 @@ func main() {
 	reader := bufio.NewReader(os.Stdin)
 	writer := bufio.NewWriter(os.Stdout)
 
-	running := true
-	for running {
+	for {
 		WriteString(writer, "$ ")
 		command := ReadString(reader)
 		command = strings.TrimSuffix(command, "\n")
+		args := strings.Split(command, " ")
 		switch command {
 		case "exit":
-
-			components := strings.Split(command, " ")
-			exitCode, err := strconv.Atoi(components[1])
+			exitCode, err := strconv.Atoi(args[1])
 			if err != nil {
-				os.Exit(1)
+				WriteString(writer, "error: argument must be an integer")
+				break
 			}
 			os.Exit(exitCode)
 		default:
