@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -37,7 +38,13 @@ func main() {
 		command = strings.TrimSuffix(command, "\n")
 		switch command {
 		case "exit":
-			running = false
+
+			components := strings.Split(command, " ")
+			exitCode, err := strconv.Atoi(components[1])
+			if err != nil {
+				os.Exit(1)
+			}
+			os.Exit(exitCode)
 		default:
 			WriteString(writer, fmt.Sprintf("%s: command not found\n", command))
 		}
