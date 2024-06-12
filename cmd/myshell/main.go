@@ -7,21 +7,40 @@ import (
 	"strings"
 )
 
-func main() {
-	// You can use print statements as follows for debugging, they'll be visible when running tests.
-	// fmt.Println("Logs from your program will appear here!")
-
-	fmt.Fprint(os.Stdout, "$ ")
-
-	command, err := bufio.NewReader(os.Stdin).ReadString('\n')
+func WriteString(w *bufio.Writer, s string) {
+	_, err := w.WriteString(s)
 	if err != nil {
-		panic(err)
+		os.Exit(1) // Exit(1) <-> IO error
 	}
+	err = w.Flush()
+	if err != nil {
+		os.Exit(1)
+	}
+}
 
-	command = strings.TrimSuffix(command, "\n")
+func ReadString(r *bufio.Reader) string {
+	s, err := r.ReadString('\n')
+	if err != nil {
+		os.Exit(1)
+	}
+	return s
+}
 
-	switch command {
-	default:
-		fmt.Fprintf(os.Stdout, "%s: command not found\n", command)
+func main() {
+	reader := bufio.NewReader(os.Stdin)
+	writer := bufio.NewWriter(os.Stdout)
+
+	WriteString(writer, "$ ")
+
+	running := true
+	for running {
+		command := ReadString(reader)
+		command = strings.TrimSuffix(command, "\n")
+		switch command {
+		case "exit":
+			running = false
+		default:
+			WriteString(writer, fmt.Sprintf("%s: command not found\n", command))
+		}
 	}
 }
