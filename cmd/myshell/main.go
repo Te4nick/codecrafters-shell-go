@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -17,8 +18,10 @@ func main() {
 		panic(err)
 	}
 
+	command = strings.TrimSuffix(command, "\n")
+
 	switch command {
 	default:
-		fmt.Fprintf(os.Stdout, "%q: command not found\n", command)
+		fmt.Fprintf(os.Stdout, "%s: command not found\n", command)
 	}
 }
