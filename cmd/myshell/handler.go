@@ -59,9 +59,9 @@ func (h *Handler) REPL() error {
 		}
 
 		cmdExt := exec.Command(args[0], args[1:]...)
-		cmdExt.Stdin = h.reader
-		cmdExt.Stdout = h.writer
-		cmdExt.Stderr = h.errWriter
+		cmdExt.Stdin = os.Stdin
+		cmdExt.Stdout = os.Stdout
+		cmdExt.Stderr = os.Stderr
 
 		err := cmdExt.Run()
 		if err != nil {
