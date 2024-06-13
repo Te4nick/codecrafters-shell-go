@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -13,11 +14,18 @@ type CMD func(writer *bufio.Writer, reader *bufio.Reader, args []string) error
 
 type Handler struct {
 	comMap map[string]CMD
+	writer *bufio.Writer
+	reader *bufio.Reader
+	path   []string
 }
 
-func NewHandler() *Handler {
+func NewHandler(writer *bufio.Writer, reader *bufio.Reader, path string) *Handler {
+	pathSlice := strings.Split(path, ":")
 	h := &Handler{
 		comMap: make(map[string]CMD),
+		writer: writer,
+		reader: reader,
+		path:   pathSlice,
 	}
 
 	h.Register("exit", h.builtinExit)
@@ -31,22 +39,22 @@ func (h *Handler) Register(name string, fn CMD) {
 	h.comMap[name] = fn
 }
 
-func (h *Handler) REPL(writer *bufio.Writer, reader *bufio.Reader) error {
+func (h *Handler) REPL() error {
 	for {
-		WriteString(writer, "$ ")
-		command := ReadString(reader)
+		WriteString(h.writer, "$ ")
+		command := ReadString(h.reader)
 		command = strings.TrimSuffix(command, "\n")
 		args := strings.Split(command, " ")
 
 		cmd, ok := h.comMap[args[0]]
 		if !ok {
-			WriteStringln(writer, fmt.Sprintf("%s: command not found", args[0]))
+			WriteStringln(h.writer, fmt.Sprintf("%s: command not found", args[0]))
 			continue
 		}
 
-		err := cmd(writer, reader, args)
+		err := cmd(h.writer, h.reader, args)
 		if err != nil {
-			WriteStringln(writer, fmt.Sprintf("%s: %s", args[0], err.Error()))
+			WriteStringln(h.writer, fmt.Sprintf("%s: %s", args[0], err.Error()))
 		}
 	}
 }
@@ -74,12 +82,23 @@ func (h *Handler) builtinEcho(writer *bufio.Writer, _ *bufio.Reader, args []stri
 func (h *Handler) builtinType(writer *bufio.Writer, _ *bufio.Reader, args []string) error {
 	_, ok := h.comMap[args[1]]
 	var msg string
-	if !ok {
-		msg = fmt.Sprintf("%s: not found", args[1])
-	} else {
+	if ok {
 		msg = fmt.Sprintf("%s is a shell builtin", args[1])
+		WriteStringln(writer, msg)
+		return nil
 	}
 
+	for _, dir := range h.path {
+		fp := filepath.Join(dir, args[1])
+		_, err := os.Stat(fp)
+		if err == nil {
+			msg = fmt.Sprintf("%s is %s", args[1], fp)
+			WriteStringln(writer, msg)
+			return nil
+		}
+	}
+
+	msg = fmt.Sprintf("%s: not found", args[1])
 	WriteStringln(writer, msg)
 	return nil
 }
