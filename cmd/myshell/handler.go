@@ -34,6 +34,7 @@ func NewHandler(reader *bufio.Reader, writer *bufio.Writer, errWriter *bufio.Wri
 	h.Register("exit", h.builtinExit)
 	h.Register("echo", h.builtinEcho)
 	h.Register("type", h.builtinType)
+	h.Register("pwd", h.builtinPwd)
 
 	return h
 }
