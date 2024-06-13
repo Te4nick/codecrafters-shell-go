@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -13,19 +14,21 @@ import (
 type CMD func(writer *bufio.Writer, reader *bufio.Reader, args []string) error
 
 type Handler struct {
-	comMap map[string]CMD
-	writer *bufio.Writer
-	reader *bufio.Reader
-	path   []string
+	comMap    map[string]CMD
+	reader    *bufio.Reader
+	writer    *bufio.Writer
+	errWriter *bufio.Writer
+	path      []string
 }
 
-func NewHandler(writer *bufio.Writer, reader *bufio.Reader, path string) *Handler {
+func NewHandler(reader *bufio.Reader, writer *bufio.Writer, errWriter *bufio.Writer, path string) *Handler {
 	pathSlice := strings.Split(path, ":")
 	h := &Handler{
-		comMap: make(map[string]CMD),
-		writer: writer,
-		reader: reader,
-		path:   pathSlice,
+		comMap:    make(map[string]CMD),
+		reader:    reader,
+		writer:    writer,
+		errWriter: errWriter,
+		path:      pathSlice,
 	}
 
 	h.Register("exit", h.builtinExit)
@@ -54,7 +57,15 @@ func (h *Handler) REPL() error {
 
 		err := cmd(h.writer, h.reader, args)
 		if err != nil {
-			WriteStringln(h.writer, fmt.Sprintf("%s: %s", args[0], err.Error()))
+			cmd := exec.Command(args[0], args[1:]...)
+			cmd.Stdin = h.reader
+			cmd.Stdout = h.writer
+			cmd.Stderr = h.errWriter
+
+			err = cmd.Run()
+			if err != nil {
+				WriteStringln(h.writer, fmt.Sprintf("%s: %s", args[0], err.Error()))
+			}
 		}
 	}
 }

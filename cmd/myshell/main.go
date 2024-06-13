@@ -31,9 +31,10 @@ func ReadString(r *bufio.Reader) string {
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 	writer := bufio.NewWriter(os.Stdout)
+	errWriter := bufio.NewWriter(os.Stderr)
 	path := os.Getenv("PATH")
 
-	h := NewHandler(writer, reader, path)
+	h := NewHandler(reader, writer, errWriter, path)
 
 	err := h.REPL()
 	if err != nil {
