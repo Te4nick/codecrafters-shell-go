@@ -113,3 +113,13 @@ func (h *Handler) builtinType(writer *bufio.Writer, _ *bufio.Reader, args []stri
 	WriteStringln(writer, msg)
 	return nil
 }
+
+func (h *Handler) builtinPwd(writer *bufio.Writer, _ *bufio.Reader, _ []string) error {
+	cwd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	WriteStringln(writer, cwd)
+	return nil
+}
