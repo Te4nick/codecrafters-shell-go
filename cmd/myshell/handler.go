@@ -127,6 +127,14 @@ func (h *Handler) builtinPwd(writer *bufio.Writer, _ *bufio.Reader, _ []string) 
 }
 
 func (h *Handler) builtinCd(_ *bufio.Writer, _ *bufio.Reader, args []string) error {
+	if len(args) == 1 {
+		args = append(args, os.Getenv("HOME"))
+	}
+
+	if args[1][0] == '~' {
+		args[1] = strings.Replace(args[1], "~", os.Getenv("HOME"), 1)
+	}
+
 	err := os.Chdir(args[1])
 	if err != nil {
 		return errors.New(fmt.Sprintf("%s: No such file or directory", args[1]))
