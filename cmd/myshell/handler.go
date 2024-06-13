@@ -50,20 +50,22 @@ func (h *Handler) REPL() error {
 		args := strings.Split(command, " ")
 
 		cmd, ok := h.comMap[args[0]]
-		if !ok {
+		if ok {
 			err := cmd(h.writer, h.reader, args)
 			if err != nil {
-				cmd := exec.Command(args[0], args[1:]...)
-				cmd.Stdin = h.reader
-				cmd.Stdout = h.writer
-				cmd.Stderr = h.errWriter
-
-				err = cmd.Run()
-				if err != nil {
-					WriteStringln(h.writer, fmt.Sprintf("%s: command not found", args[0]))
-				}
+				WriteStringln(h.writer, fmt.Sprintf("%s: %s", args[0], err.Error()))
 			}
+			continue
+		}
 
+		cmdExt := exec.Command(args[0], args[1:]...)
+		cmdExt.Stdin = h.reader
+		cmdExt.Stdout = h.writer
+		cmdExt.Stderr = h.errWriter
+
+		err := cmdExt.Run()
+		if err != nil {
+			WriteStringln(h.writer, fmt.Sprintf("%s: command not found", args[0]))
 		}
 	}
 }
