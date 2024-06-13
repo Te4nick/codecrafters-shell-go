@@ -35,6 +35,7 @@ func NewHandler(reader *bufio.Reader, writer *bufio.Writer, errWriter *bufio.Wri
 	h.Register("echo", h.builtinEcho)
 	h.Register("type", h.builtinType)
 	h.Register("pwd", h.builtinPwd)
+	h.Register("cd", h.builtinCd)
 
 	return h
 }
@@ -122,5 +123,14 @@ func (h *Handler) builtinPwd(writer *bufio.Writer, _ *bufio.Reader, _ []string) 
 	}
 
 	WriteStringln(writer, cwd)
+	return nil
+}
+
+func (h *Handler) builtinCd(_ *bufio.Writer, _ *bufio.Reader, args []string) error {
+	err := os.Chdir(args[1])
+	if err != nil {
+		return errors.New(fmt.Sprintf("%s: No such file or directory", args[1]))
+	}
+
 	return nil
 }
